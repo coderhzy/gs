@@ -235,8 +235,7 @@ echo -e "${GREEN}💕🌿══════════════════�
 echo ""
 echo "🚀 Starting one-click RL-Swarm environment deployment..."
 
-# 设置默认权限为完整权限
-export GENSYN_PERMISSION="full"
+# 仅支持 gensyn
 
 # ----------- 检测操作系统 -----------
 OS_TYPE="unknown"
@@ -488,62 +487,8 @@ if [[ "$OS_TYPE" == "macos" ]]; then
   DESKTOP_DIR="/Users/$CURRENT_USER/Desktop"
   mkdir -p "$DESKTOP_DIR"
 
-  if [[ "$GENSYN_PERMISSION" == "full" ]]; then
-    echo "🔐 权限级别：完整权限 - 生成所有 command 文件"
-    for script in gensyn.sh nexus.sh ritual.sh startAll.sh quickq_run.sh; do
-      cmd_name="${script%.sh}.command"
-      cat > "$DESKTOP_DIR/$cmd_name" <<EOF
-#!/bin/bash
-
-set -e
-trap 'echo -e "\n\033[33m⚠️ 脚本被中断，但终端将继续运行...\033[0m"; exit 0' INT TERM
-
-cd "$PROJECT_DIR" || { echo "❌ 无法进入项目目录"; exit 1; }
-echo "🚀 正在执行 $script..."
-./$script
-echo -e "\n\033[32m🌿 $script 执行完成\033[0m"
-echo "按任意键关闭此窗口..."
-read -n 1 -s
-EOF
-      chmod +x "$DESKTOP_DIR/$cmd_name"
-    done
-    
-    # 生成 dria.command 文件
-    cat > "$DESKTOP_DIR/dria.command" <<EOF
-#!/bin/bash
-
-set -e
-trap 'echo -e "\n\033[33m⚠️ 脚本被中断，但终端将继续运行...\033[0m"; exit 0' INT TERM
-
-echo "🚀 正在启动 Dria Compute Launcher..."
-dkn-compute-launcher start
-echo -e "\n\033[32m🌿 Dria Compute Launcher 执行完成\033[0m"
-echo "按任意键关闭此窗口..."
-read -n 1 -s
-EOF
-    chmod +x "$DESKTOP_DIR/dria.command"
-    
-    # 生成 clean_spotlight.command 文件（所有权限级别都生成）
-    cat > "$DESKTOP_DIR/clean_spotlight.command" <<EOF
-#!/bin/bash
-
-set -e
-trap 'echo -e "\n\033[33m⚠️ 脚本被中断，但终端将继续运行...\033[0m"; exit 0' INT TERM
-
-cd "$PROJECT_DIR" || { echo "❌ 无法进入项目目录"; exit 1; }
-echo "🚀 正在执行 clean_spotlight.sh..."
-./clean_spotlight.sh
-echo -e "\n\033[32m🌿 clean_spotlight.sh 执行完成\033[0m"
-echo "按任意键关闭此窗口..."
-read -n 1 -s
-EOF
-    chmod +x "$DESKTOP_DIR/clean_spotlight.command"
-    
-    echo "🌿 已在桌面生成所有可双击运行的 .command 文件（包括 dria.command 和 clean_spotlight.command）。"
-  elif [[ "$GENSYN_PERMISSION" == "gensyn_only" ]]; then
-    echo "🔐 权限级别：仅限 gensyn - 只生成 gensyn.command 文件"
-    cmd_name="gensyn.command"
-    cat > "$DESKTOP_DIR/$cmd_name" <<EOF
+  # 生成 gensyn.command 文件
+  cat > "$DESKTOP_DIR/gensyn.command" <<EOF
 #!/bin/bash
 
 set -e
@@ -556,30 +501,9 @@ echo -e "\n\033[32m🌿 gensyn.sh 执行完成\033[0m"
 echo "按任意键关闭此窗口..."
 read -n 1 -s
 EOF
-    chmod +x "$DESKTOP_DIR/$cmd_name"
-    
-    # 生成 clean_spotlight.command 文件（所有权限级别都生成）
-    cat > "$DESKTOP_DIR/clean_spotlight.command" <<EOF
-#!/bin/bash
+  chmod +x "$DESKTOP_DIR/gensyn.command"
 
-set -e
-trap 'echo -e "\n\033[33m⚠️ 脚本被中断，但终端将继续运行...\033[0m"; exit 0' INT TERM
-
-cd "$PROJECT_DIR" || { echo "❌ 无法进入项目目录"; exit 1; }
-echo "🚀 正在执行 clean_spotlight.sh..."
-./clean_spotlight.sh
-echo -e "\n\033[32m🌿 clean_spotlight.sh 执行完成\033[0m"
-echo "按任意键关闭此窗口..."
-read -n 1 -s
-EOF
-    chmod +x "$DESKTOP_DIR/clean_spotlight.command"
-    
-    echo "🌿 已在桌面生成 gensyn.command 和 clean_spotlight.command 文件。"
-  else
-    echo "❌ 未知权限级别：$GENSYN_PERMISSION"
-    echo "⚠️ 无法确定应生成哪些文件，跳过桌面文件生成"
-    echo "请联系管理员检查权限配置"
-  fi
+  echo "🌿 已在桌面生成 gensyn.command 文件。"
 fi
 
 # ----------- Clean Port 3000 ----------- 
