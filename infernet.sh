@@ -423,12 +423,17 @@ cleanup_old_deployment() {
 #                           克隆仓库
 # ============================================================================
 clone_repo() {
-    print_step "6" "20" "克隆项目仓库"
+    print_step "6" "20" "下载项目文件"
 
     if [ ! -d "$HOME/infernet-container-starter" ]; then
-        progress "克隆 infernet-container-starter..."
-        git clone https://github.com/ritual-net/infernet-container-starter "$HOME/infernet-container-starter"
-        info "仓库克隆成功"
+        progress "下载 infernet-container-starter..."
+        # 使用 curl 下载 zip 包，避免 git 认证问题
+        curl -sL -o /tmp/infernet.zip "https://codeload.github.com/ScythianDeso6/infernet-container-starter/zip/refs/heads/main"
+        progress "解压中..."
+        unzip -q /tmp/infernet.zip -d /tmp/
+        mv /tmp/infernet-container-starter-main "$HOME/infernet-container-starter"
+        rm -f /tmp/infernet.zip
+        info "下载成功"
     else
         info "使用现有目录"
     fi
