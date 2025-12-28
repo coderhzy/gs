@@ -309,14 +309,16 @@ install_nexus_cli() {
   local attempt=1
   while [[ $attempt -le 3 ]]; do
     log "${BLUE}尝试安装 (第 $attempt 次)...${NC}"
-    if curl -s https://cli.nexus.xyz/ | sh &>/dev/null; then
+    # 不隐藏输出，允许用户交互
+    if curl -sSf https://cli.nexus.xyz/ | sh; then
       log "${GREEN}Nexus CLI 安装成功！${NC}"
       break
     fi
+    log "${YELLOW}安装失败，2秒后重试...${NC}"
     ((attempt++))
     sleep 2
   done
-  
+
   source "$CONFIG_FILE" 2>/dev/null
   [[ -f "$HOME/.zshrc" ]] && source "$HOME/.zshrc" 2>/dev/null
   sleep 2
