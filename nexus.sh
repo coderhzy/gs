@@ -399,7 +399,11 @@ get_all_node_ids() {
     echo -e "${RED}配置文件不存在${NC}"
     exit 1
   fi
-  mapfile -t NODE_IDS < <(jq -r '.node_ids[]' "$CONFIG_PATH")
+  # 兼容 bash 3.x (macOS 默认)
+  NODE_IDS=()
+  while IFS= read -r line; do
+    [[ -n "$line" ]] && NODE_IDS+=("$line")
+  done < <(jq -r '.node_ids[]' "$CONFIG_PATH" 2>/dev/null)
 }
 
 # ============ 进程管理 ============
