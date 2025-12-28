@@ -334,7 +334,21 @@ check_docker() {
 
     if ! command -v docker &> /dev/null; then
         progress "安装 Docker Desktop..."
-        brew install --cask docker
+        # 先尝试清理可能的冲突
+        brew uninstall --cask docker 2>/dev/null || true
+        brew untap homebrew/cask 2>/dev/null || true
+
+        # 直接下载安装 Docker Desktop
+        progress "下载 Docker Desktop..."
+        curl -L -o ~/Downloads/Docker.dmg "https://desktop.docker.com/mac/main/arm64/Docker.dmg"
+
+        progress "挂载并安装..."
+        hdiutil attach ~/Downloads/Docker.dmg
+        cp -R "/Volumes/Docker/Docker.app" /Applications/ 2>/dev/null || true
+        hdiutil detach "/Volumes/Docker"
+        rm ~/Downloads/Docker.dmg
+
+        info "Docker Desktop 安装成功"
         echo ""
         echo -e "${YELLOW}  ⚠️  请手动打开 Docker Desktop: open -a Docker${NC}"
         echo -e "${YELLOW}  ⚠️  等待 Docker 启动完成后按 Enter 继续...${NC}"
@@ -343,9 +357,9 @@ check_docker() {
         info "Docker 已安装 ($(docker --version))"
     fi
 
-    # Docker Compose
+    # Docker Compose (使用 formula 而非 cask)
     if ! command -v docker-compose &> /dev/null; then
-        install_with_retry "Docker Compose" "brew install docker-compose"
+        install_with_retry "Docker Compose" "brew install --formula docker-compose"
     else
         info "Docker Compose 已安装"
     fi
