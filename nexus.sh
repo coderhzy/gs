@@ -281,7 +281,13 @@ install_homebrew() {
 install_cmake() {
   if check_command cmake; then return; fi
   print_header "安装 CMake"
-  [[ "$OS_TYPE" == "Ubuntu" ]] && sudo apt-get install -y cmake || brew install cmake
+  if [[ "$OS_TYPE" == "Ubuntu" ]]; then
+    sudo apt-get install -y cmake
+  else
+    # 使用 formula 版本避免 cask 冲突
+    brew uninstall --cask cmake 2>/dev/null || true
+    brew install --formula cmake
+  fi
 }
 
 install_protobuf() {
