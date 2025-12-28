@@ -332,34 +332,35 @@ check_and_install_deps() {
 check_docker() {
     print_step "2" "20" "检查 Docker"
 
-    if ! command -v docker &> /dev/null; then
-        progress "安装 Docker Desktop..."
-        # 先尝试清理可能的冲突
-        brew uninstall --cask docker 2>/dev/null || true
-        brew untap homebrew/cask 2>/dev/null || true
-
-        # 直接下载安装 Docker Desktop
+    if ! command -v docker &> /dev/null && [ ! -d "/Applications/Docker.app" ]; then
         progress "下载 Docker Desktop..."
         curl -L -o ~/Downloads/Docker.dmg "https://desktop.docker.com/mac/main/arm64/Docker.dmg"
 
         progress "挂载并安装..."
-        hdiutil attach ~/Downloads/Docker.dmg
-        cp -R "/Volumes/Docker/Docker.app" /Applications/ 2>/dev/null || true
-        hdiutil detach "/Volumes/Docker"
-        rm ~/Downloads/Docker.dmg
+        hdiutil attach ~/Downloads/Docker.dmg -quiet
+        cp -R "/Volumes/Docker/Docker.app" /Applications/
+        hdiutil detach "/Volumes/Docker" -quiet
+        rm -f ~/Downloads/Docker.dmg
 
         info "Docker Desktop 安装成功"
         echo ""
         echo -e "${YELLOW}  ⚠️  请手动打开 Docker Desktop: open -a Docker${NC}"
         echo -e "${YELLOW}  ⚠️  等待 Docker 启动完成后按 Enter 继续...${NC}"
         read -p ""
+    elif [ -d "/Applications/Docker.app" ] && ! command -v docker &> /dev/null; then
+        warn "Docker Desktop 已安装但未启动"
+        echo -e "${YELLOW}  ⚠️  请打开 Docker Desktop: open -a Docker${NC}"
+        echo -e "${YELLOW}  ⚠️  等待 Docker 启动完成后按 Enter 继续...${NC}"
+        read -p ""
     else
         info "Docker 已安装 ($(docker --version))"
     fi
 
-    # Docker Compose (使用 formula 而非 cask)
+    # Docker Compose (Docker Desktop 自带，也可单独安装)
     if ! command -v docker-compose &> /dev/null; then
-        install_with_retry "Docker Compose" "brew install --formula docker-compose"
+        progress "安装 Docker Compose..."
+        brew install --formula docker-compose 2>/dev/null || true
+        info "Docker Compose 已配置"
     else
         info "Docker Compose 已安装"
     fi
